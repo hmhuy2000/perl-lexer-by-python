@@ -19,3 +19,5 @@ def check_print(line, cnt):
         print(match,cnt)
     
     return ok
+
+def check_scalar(line,cnt):
