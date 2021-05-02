@@ -3,5 +3,5 @@
 
 # done-list:
 
-- comment\n
-- print\n	
+- comment
+- print	
