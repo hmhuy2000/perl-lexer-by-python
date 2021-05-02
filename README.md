@@ -1,6 +1,6 @@
 # perl-lexer-by-python
 
 
-done-list:
-	- comment
-	- print
+done-list:\n
+	- comment\n
+	- print\n	
