@@ -1,4 +1,7 @@
 # Prints the message using two different delimeters.
-print "Hello, world!\n";
-print("Hello, world!\n");
-print qq=Did you say "Hello?"\n=;
+    # print("Hello $abc world$def!\n");
+# print "Hello $abc world$def!\n";
+# if then function
+$abc = 100;
+@aaa = [1,2,34];
+aaa;

@@ -2,14 +2,15 @@ import re
 from function import *
 
 file = open('sample.pl','r')
-cnt = 0
+def main():
+    cur = 0
+    for line in file:
+        if (line[-1] == '\n'):
+            line = line[:-1]
+        extract(line, cur)
+        cur += 1
+    file.close()
 
-for line in file:
-    if (check_comment(line, cnt)):
-        cnt += 1
-        continue
-    if (check_print(line, cnt)):
-        cnt += 1
-        continue
 
-file.close()
+if __name__ == "__main__":
+    main()
