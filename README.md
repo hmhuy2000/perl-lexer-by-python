@@ -4,4 +4,5 @@
 # done-list:
 
 - comment
-- print	
+- keywords
+- id
