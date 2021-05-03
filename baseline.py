@@ -11,5 +11,8 @@ for line in file:
     if (check_print(line, cnt)):
         cnt += 1
         continue
+    if(check_float(line,cnt)):
+        cnt += 1
+        continue
 
 file.close()
