@@ -1,13 +1,19 @@
 import re
 import numpy as np
-keywords = ['DATA','END','FILE','LINE','PACKAGE','and','cmp','continue','CORE','do',\
-            'else','elif','eq','exp','for','foreach','ge','gt','if','le','lock','lt',\
+keywords = ['DATA','END','FILE','STDIN','LINE','PACKAGE','and','cmp','continue','CORE','do',\
+            'else','elsif','eq','exp','for','foreach','ge','gt','if','le','lock','lt',\
             'm','ne','no','or','package','q','qq','qr','qw','qx','s','sub','tr',\
-            'unless','until','while','xor','y', 'use','my'] # fix danh sách này cho đúng giúp tui
+            'unless','until','while','xor','y', 'use','my','return','print','die'] # fix danh sách này cho đúng giúp tui
 
 def check(line, cur):
     if (is_comment(line)):
         print(f'(< {line} >, COMMENT, {cur})')
+        return True
+    if (is_RE(line)):
+        print(f'(< {line} >, RE, {cur})')
+        return True
+    if (is_NAMESPACE(line)):
+        print(f'(< {line} >, NAMESPACE, {cur})')
         return True
     if (is_keyword(line)):
         print(f'(< {line} >, KEYWORD, {cur})')
@@ -138,6 +144,12 @@ def check(line, cur):
     if (is_LBraces(line)):
         print(f'(< {line} >, LBRACES, {cur})')
         return True
+    if (is_HASHASSIGN(line)):
+        print(f'(< {line} >, HASH ASSIGN, {cur})')
+        return True
+    if (is_RETEST(line)):
+        print(f'(< {line} >, RE TEST, {cur})')
+        return True
 
 
     return False
@@ -149,6 +161,10 @@ def extract(line, cur):
         line = line[1:]
     while(line[-1] == ' '):
         line = line[:-1]
+    while(line[0] == '\t'):
+        line = line[1:]
+    while(line[-1] == '\t'):
+        line = line[:-1]
     Lrange = np.arange(1,len(line)+1)
     Lrange = Lrange[::-1]
     for Length in Lrange:
@@ -157,14 +173,17 @@ def extract(line, cur):
             return 
 
 def is_comment(line):
-    pattern = re.compile(r'#\.*')
+    pattern = re.compile(r'\#.*')
     matches = pattern.finditer(line)
     ok = 0
     for match in matches:
-        ok = 1
-        return ok
+        if (match.start() == 0 and match.end() == len(line)):
+            ok = 1
+            return ok
 
     return ok
+
+
 
 def is_keyword(line):
     global keywords
@@ -172,7 +191,7 @@ def is_keyword(line):
 
 def is_ID(line):
     global keywords
-    pattern = re.compile(r'[\$\@][a-zA-Z][a-zA-Z0-9]*')
+    pattern = re.compile(r'[\$\@\%\&][\_a-zA-Z][\_a-zA-Z0-9]*')
     matches = pattern.finditer(line)
     ok = 0
     for match in matches:
@@ -180,7 +199,7 @@ def is_ID(line):
             ok = 1
             return ok
     
-    pattern = re.compile(r'[a-zA-Z][a-zA-Z0-9]*')
+    pattern = re.compile(r'[\_a-zA-Z][\_a-zA-Z0-9]*')
     matches = pattern.finditer(line)
     ok = 0
     for match in matches:
@@ -188,6 +207,75 @@ def is_ID(line):
             ok = 1
             return ok
     return ok
+
+def is_NUM(line):
+    pattern = re.compile(r'\d+')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+    return ok
+
+def is_RE(line):
+    pattern = re.compile(r'(/.+?/|\|.+?\|)')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+        break
+            
+            
+    return ok
+
+def is_REALNUM(line):
+    pattern = re.compile(r'\d+\.\d+')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+    return ok
+
+def is_STRING(line):
+    pattern = re.compile(r'(\".*?[^\\]\"|\'.*?[^\\]\')')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+    return ok
+
+def is_NUM8(line):
+    pattern = re.compile(r'[0-9]+x08')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+    return ok
+
+def is_NUM16(line):
+    pattern = re.compile(r'[0-9A-F]+x16')
+    matches = pattern.finditer(line)
+    ok = 0
+    for match in matches:
+        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
+            ok = 1
+            return ok
+    return ok
+
+def is_RETEST(line):
+    return line == '=~'
+
+def is_NAMESPACE(line):
+    return line == '::'
 
 def is_SEMICOLON(line):
     return line == ';'
@@ -230,56 +318,6 @@ def is_NEQUAL(line):
 
 def is_Comparison(line):
     return line == '<=>'
-
-def is_NUM(line):
-    pattern = re.compile(r'\d+')
-    matches = pattern.finditer(line)
-    ok = 0
-    for match in matches:
-        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
-            ok = 1
-            return ok
-    return ok
-
-def is_REALNUM(line):
-    pattern = re.compile(r'\d+\.\d+')
-    matches = pattern.finditer(line)
-    ok = 0
-    for match in matches:
-        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
-            ok = 1
-            return ok
-    return ok
-
-def is_STRING(line):
-    pattern = re.compile(r'(\".*\"|\'.*\')')
-    matches = pattern.finditer(line)
-    ok = 0
-    for match in matches:
-        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
-            ok = 1
-            return ok
-    return ok
-
-def is_NUM8(line):
-    pattern = re.compile(r'[0-9]+x08')
-    matches = pattern.finditer(line)
-    ok = 0
-    for match in matches:
-        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
-            ok = 1
-            return ok
-    return ok
-
-def is_NUM16(line):
-    pattern = re.compile(r'[0-9A-F]+x16')
-    matches = pattern.finditer(line)
-    ok = 0
-    for match in matches:
-        if (match.start() == 0 and match.end() == len(line) and line not in keywords):
-            ok = 1
-            return ok
-    return ok
 
 def is_plus(line):
     return line == '+'
@@ -349,3 +387,6 @@ def is_LBraces(line):
 
 def is_RBraces(line):
     return line == '}'
+
+def is_HASHASSIGN(line):
+    return line == '=>'

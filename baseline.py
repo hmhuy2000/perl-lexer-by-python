@@ -5,10 +5,11 @@ file = open('sample.pl','r')
 def main():
     cur = 0
     for line in file:
+        cur += 1
         if (line[-1] == '\n'):
             line = line[:-1]
+        # print(line)
         extract(line, cur)
-        cur += 1
     file.close()
 
 
